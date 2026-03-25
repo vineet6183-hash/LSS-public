@@ -1,0 +1,5 @@
+msal
+requests
+pdfplumber
+beautifulsoup4
+openpyxl

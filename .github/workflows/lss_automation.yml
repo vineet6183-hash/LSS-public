@@ -1,0 +1,43 @@
+name: LSS Invoice Automation
+
+on:
+  # Triggered by Power Automate via GitHub API
+  repository_dispatch:
+    types: [run-lss-automation]
+
+  # Also allow manual trigger from the GitHub Actions UI
+  workflow_dispatch:
+
+jobs:
+  run-automation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run LSS Invoice Automation
+        env:
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          USER_EMAIL: ${{ secrets.USER_EMAIL }}
+          OUTPUT_EMAIL: ${{ secrets.OUTPUT_EMAIL }}
+          MASTER_TRACKER_ONEDRIVE_PATH: ${{ secrets.MASTER_TRACKER_ONEDRIVE_PATH }}
+        run: python lss_invoice_automation.py
+
+      - name: Upload log file as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: automation-log-${{ github.run_id }}
+          path: lss_automation.log
+          if-no-files-found: ignore
