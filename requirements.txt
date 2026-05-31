@@ -3,3 +3,4 @@ requests
 pdfplumber
 beautifulsoup4
 openpyxl
+streamlit>=1.35.0
