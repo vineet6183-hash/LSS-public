@@ -2,5 +2,21 @@
 __pycache__/
 *.pyc
 *.pyo
+
+# Environment / secrets
 .env
 .env.*
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Streamlit secrets (never commit these)
+.streamlit/secrets.toml
+
+# Output artefacts
+*.xlsx
+*.pdf
+lss_incoming/
+lss_processed/
+lss_output/

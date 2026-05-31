@@ -19,7 +19,22 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # ── Password protection ───────────────────────────────────────────────────────
-APP_PASSWORD = os.environ.get("APP_PASSWORD", "lss2024!")
+# Set APP_PASSWORD in Streamlit secrets (secrets.toml) or as an environment variable.
+# The app will refuse to start if no password is configured.
+def _get_app_password() -> str:
+    # Streamlit Cloud secrets take precedence
+    try:
+        return st.secrets["APP_PASSWORD"]
+    except (KeyError, FileNotFoundError):
+        pass
+    pwd = os.environ.get("APP_PASSWORD", "")
+    if not pwd:
+        st.error(
+            "APP_PASSWORD is not configured. "
+            "Set it in Streamlit secrets or as an environment variable before deploying."
+        )
+        st.stop()
+    return pwd
 
 
 def check_password() -> bool:
@@ -35,7 +50,7 @@ def check_password() -> bool:
         submitted = st.form_submit_button("Login")
 
     if submitted:
-        if pwd == APP_PASSWORD:
+        if pwd == _get_app_password():
             st.session_state["authenticated"] = True
             st.rerun()
         else:
