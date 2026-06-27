@@ -1,10 +1,6 @@
 name: LSS Invoice Automation
 
 on:
-  # Run automatically every weekday at 9 AM EST (2 PM UTC)
-  schedule:
-    - cron: '0 14 * * 1-5'
-
   # Triggered by Power Automate via GitHub API
   repository_dispatch:
     types: [run-lss-automation]
