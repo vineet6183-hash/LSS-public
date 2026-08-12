@@ -58,97 +58,72 @@ class ExcelGenerator:
         for invoice_data in invoice_data_list:
             if not invoice_data:
                 continue
-            
+
             header = invoice_data.get("header", {})
             line_items = invoice_data.get("line_items", [])
-            
-            # Extract header info (Only use what's needed for requested fields)
+            totals = invoice_data.get("totals", {})
+
             invoice_number = header.get("invoice_number", "")
+            client = header.get("client", "")
             invoice_date = header.get("invoice_date", "")
-            
+            matter_name = header.get("matter_name", "")
+            appeal_expiry = header.get("appeal_expiry", "")
+            total_submitted = totals.get("submitted", 0)
+
             for item in line_items:
-                # Selective Filtering: Ignore line items where reduction is zero
+                # Only export line items that have a reduction
                 reduced_amount = item.get("reduced_amount", 0)
                 if reduced_amount <= 0:
                     continue
-                
-                # Map extracted data to the 22-column structure
-                # 1. Invoice Number
-                # 2. Company (IGNORE)
-                # 3. User (IGNORE)
-                # 4. Invoice Date
-                # 5. Working Timekeeper
-                # 6. Billing Timekeeper
-                # 7. Description (Empty)
-                # 8. Date of Item
-                # 9. Last Date to add Attorney Information
-                # 10. Appeal Status
-                # 11. Matter Number (IGNORE)
-                # 12. Task ID
-                # 13. Item Type
-                # 14. UNITS
-                # 15. RATE
-                # 16. AMOUNT
-                # 17. Reduced Amount
-                # 18. Total Invoice Amount
-                # 19. Narrative (Consolidated description starting after bracket + Audit Reason)
-                # 20. Attorney Comment (Audit Reason)
-                # 21. Attachment
-                # 22. Attachment : URL
-                
-                # Format Narrative: Description + \n + 'Audit Reason : ' + Audit Reason
+
                 description = item.get("description", "")
                 audit_reason = item.get("audit_reason", "")
+
+                # Narrative = description + audit reason block
                 narrative = description
                 if audit_reason:
                     narrative += f"\nAudit Reason : {audit_reason}"
 
-                # Item Type logic: 'Fees' if Initials are not Blank else 'Expenses'
+                # Item Type: 'Fees' when timekeeper initials present, else 'Expenses'
                 tk_initials = item.get("timekeeper_id", "").strip()
                 item_type_display = "Fees" if tk_initials else "Expenses"
 
+                # 15-column BillSync layout
                 values = [
-                    invoice_number,                          # 1
-                    "",                                      # 2 (Ignore Company)
-                    "",                                      # 3 (Ignore User)
-                    invoice_date,                            # 4
-                    item.get("timekeeper", ""),              # 5 (Full Name)
-                    "",                                      # 6
-                    "",                                      # 7
-                    item.get("date", ""),                    # 8
-                    "",                                      # 9
-                    "",                                      # 10
-                    "",                                      # 11 (Ignore Matter Number)
-                    "",                                      # 12
-                    item_type_display,                       # 13 (Fees/Expenses)
-                    item.get("units", 0),                    # 14
-                    item.get("rate", 0),                     # 15
-                    item.get("amount", 0),                   # 16
-                    item.get("reduced_amount", 0),           # 17
-                    "",                                      # 18
-                    narrative,                               # 19
-                    "",                                      # 20 (Keep Blank)
-                    "",                                      # 21
-                    ""                                       # 22
+                    invoice_number,              # A  Invoice Number
+                    client,                      # B  Client (insurance company)
+                    invoice_date,                # C  Invoice Date
+                    item.get("timekeeper", ""),  # D  Working Timekeeper
+                    matter_name,                 # E  Matter Name
+                    item.get("date", ""),        # F  Date of Item
+                    appeal_expiry,               # G  Appeal Expiry (Finalized + 30 days)
+                    item_type_display,           # H  Item Type
+                    item.get("units", 0),        # I  UNITS
+                    item.get("rate", 0),         # J  RATE
+                    item.get("amount", 0),       # K  AMOUNT
+                    reduced_amount,              # L  Reduced Amount
+                    total_submitted,             # M  Total Invoice Amount
+                    narrative,                   # N  Narrative
+                    audit_reason,                # O  Adjustment Reason
                 ]
-                
+
                 # Write values to row
                 for col_idx, value in enumerate(values, start=1):
                     cell = self.worksheet.cell(row=row_idx, column=col_idx)
                     cell.value = value
-                    
-                    # Format currency columns
-                    if col_idx in [15, 16, 17]:  # RATE, AMOUNT, Reduced Amount
+
+                    # Currency: RATE (J=10), AMOUNT (K=11), Reduced Amount (L=12), Total (M=13)
+                    if col_idx in [10, 11, 12, 13]:
                         cell.number_format = '$#,##0.00'
-                    
-                    # Format Units
-                    if col_idx == 14:  # UNITS
+
+                    # Units (I=9)
+                    if col_idx == 9:
                         cell.number_format = '0.00'
-                    
-                    # Center align date and units
-                    if col_idx in [4, 8, 14]:  # Invoice Date, Date of Item, UNITS
+
+                    # Center-align dates and units
+                    if col_idx in [3, 6, 7, 9]:  # Invoice Date, Date of Item, Appeal Expiry, UNITS
                         cell.alignment = Alignment(horizontal="center")
-                
+
                 row_idx += 1
         
         total_rows = row_idx - 2
@@ -157,26 +132,28 @@ class ExcelGenerator:
     
     def apply_column_widths(self):
         """Auto-adjust column widths for readability"""
-        # Define column widths for all 22 columns
+        # Column widths for 15-column BillSync layout
         column_widths = {
-            'A': 15, 'B': 25, 'C': 20, 'D': 15, 'E': 25, 
-            'F': 25, 'G': 15, 'H': 15, 'I': 15, 'J': 15,
-            'K': 20, 'L': 15, 'M': 15, 'N': 10, 'O': 12,
-            'P': 12, 'Q': 15, 'R': 15, 'S': 60, 'T': 40,
-            'U': 15, 'V': 30
+            'A': 15,  # Invoice Number
+            'B': 30,  # Client
+            'C': 14,  # Invoice Date
+            'D': 25,  # Working Timekeeper
+            'E': 55,  # Matter Name
+            'F': 14,  # Date of Item
+            'G': 14,  # Appeal Expiry
+            'H': 12,  # Item Type
+            'I': 10,  # UNITS
+            'J': 12,  # RATE
+            'K': 12,  # AMOUNT
+            'L': 15,  # Reduced Amount
+            'M': 20,  # Total Invoice Amount
+            'N': 60,  # Narrative
+            'O': 50,  # Adjustment Reason
         }
-        
+
         for col_letter, width in column_widths.items():
-            if col_letter in self.worksheet.column_dimensions:
-                self.worksheet.column_dimensions[col_letter].width = width
-            else:
-                # Add default width for columns beyond dictionary if needed
-                self.worksheet.column_dimensions[col_letter].width = 15
-        
-        # Explicitly set Narrative and Attorney Comment widths
-        self.worksheet.column_dimensions['S'].width = 60
-        self.worksheet.column_dimensions['T'].width = 40
-        
+            self.worksheet.column_dimensions[col_letter].width = width
+
         logger.debug("Column widths applied")
 
     

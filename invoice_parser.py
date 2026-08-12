@@ -43,52 +43,51 @@ class BaseInvoiceParser:
         header = {
             "invoice_number": "",
             "claim_number": "",
-            "company": "",
+            "client": "",
             "invoice_date": "",
             "matter_name": "",
             "auditor": "",
-            "policy_holder": ""
+            "finalized_date": "",
+            "appeal_expiry": "",
         }
-        
+
         # Extract Invoice Number (Prioritize Firm Invoice Number)
-        # Search for Firm Invoice Number first, then Invoice ID or Firm ID
-        # Labels: Firm Invoice Number, Invoice Firm ID, Invoice Firm Id, Invoice ID
         invoice_match = re.search(r"(?:Firm\s+Invoice\s+Number|Invoice\s+Firm\s+Id|Invoice\s+Firm\s+ID|Invoice\s+ID):\s*(\d+)", self.full_text, re.IGNORECASE)
         if invoice_match:
             header["invoice_number"] = invoice_match.group(1)
-        
+
         # Extract Claim Number
         claim_match = re.search(r"Claim\s+Number:\s*([A-Z0-9-]+)", self.full_text, re.IGNORECASE)
         if not claim_match:
-            # Try looking for it on the next line or with just 'Claim'
             claim_match = re.search(r"Claim:\s*([A-Z0-9-]+)", self.full_text, re.IGNORECASE)
-        
         if claim_match:
             header["claim_number"] = claim_match.group(1)
-        
-        # Extract Company/Policy Holder
-        company_match = re.search(r"Policy Holder:\s*([^\n]+)", self.full_text)
-        if company_match:
-            header["company"] = company_match.group(1).strip()
+
+        # Extract Client / Policy Holder (insurance company)
+        # For SWYFTT: "Swyfft Claims Services LLC - <Client>  Office"
+        swyftt_client = re.search(r"Swyfft\s+Claims\s+Services[^-]+-\s*(.+?)\s{2,}Office", self.full_text)
+        if swyftt_client:
+            header["client"] = swyftt_client.group(1).strip()
         else:
-            company_match = re.search(r"Policy Holder:\s*\n([^\n]+)", self.full_text)
-            if company_match:
-                header["company"] = company_match.group(1).strip()
-        
+            # Other formats: explicit "Policy Holder:" label
+            ph_match = re.search(r"Policy Holder:\s*([^\n]+)", self.full_text)
+            if ph_match:
+                header["client"] = ph_match.group(1).strip()
+            else:
+                ph_match = re.search(r"Policy Holder:\s*\n([^\n]+)", self.full_text)
+                if ph_match:
+                    header["client"] = ph_match.group(1).strip()
+
         # Extract Invoice Date
-        date_match = re.search(r"Finalized Date:\s*(\d{2}/\d{2}/\d{4})", self.full_text)
+        date_match = re.search(r"Invoice Date:\s*(\d{2}/\d{2}/\d{4})", self.full_text)
         if date_match:
             header["invoice_date"] = date_match.group(1)
-        else:
-            date_match = re.search(r"Invoice Date:\s*(\d{2}/\d{2}/\d{4})", self.full_text)
-            if date_match:
-                header["invoice_date"] = date_match.group(1)
-        
+
         # Extract Matter Name
         matter_match = re.search(r"Matter Name:\s*([^\n]+)", self.full_text)
         if matter_match:
             header["matter_name"] = matter_match.group(1).strip()
-        
+
         # Extract Auditor
         auditor_match = re.search(r"(?:Auditor|Claim Professional|Claim Rep|Finalized By):\s*([^\n]+)", self.full_text)
         if auditor_match:
@@ -97,13 +96,22 @@ class BaseInvoiceParser:
             cp_match = re.search(r"Claim Professional:\s*\n([^\n]+)", self.full_text)
             if cp_match:
                 header["auditor"] = cp_match.group(1).strip()
-        
-        # Extract Finalized Date (Appeal Exp)
+
+        # Extract Finalized Date and compute Appeal Expiry (Finalized + 30 days)
         finalized_match = re.search(r"Finalized Date:\s*(\d{2}/\d{2}/\d{4})", self.full_text)
         if finalized_match:
             header["finalized_date"] = finalized_match.group(1)
-        
-        logger.info(f"Extracted header: Invoice {header['invoice_number']}, Claim {header['claim_number']}")
+            try:
+                fin_dt = datetime.strptime(finalized_match.group(1), "%m/%d/%Y")
+                appeal_dt = fin_dt.replace(day=fin_dt.day)
+                # Add 30 days
+                from datetime import timedelta
+                appeal_dt = fin_dt + timedelta(days=30)
+                header["appeal_expiry"] = appeal_dt.strftime("%m/%d/%Y")
+            except ValueError:
+                pass
+
+        logger.info(f"Extracted header: Invoice {header['invoice_number']}, Client {header['client']}, Matter {header['matter_name']}")
         return header
 
     def extract_summary_totals(self):

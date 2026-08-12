@@ -27,30 +27,23 @@ OUTPUT_FOLDER = os.path.join(_TEMP, "lss_output")
 # Log File
 LOG_FILE = "lss_automation.log"
 
-# Excel Column Headers (BillSync Format from Sample BillSync.xlsx)
+# Excel Column Headers (BillSync Format - 15 columns)
 EXCEL_HEADERS = [
-    'Invoice Number',
-    'Company',
-    'User',
-    'Invoice Date',
-    'Working Timekeeper',
-    'Billing Timekeeper',
-    'Description',
-    'Date of Item',
-    'Last Date to add Attorney Information',
-    'Appeal Status',
-    'Matter Number',
-    'Task ID',
-    'Item Type',
-    'UNITS',
-    'RATE',
-    'AMOUNT',
-    'Reduced Amount',
-    'Total Invoice Amount',
-    'Narrative',
-    'Attorney Comment',
-    'Attachment',
-    'Attachment : URL'
+    'Invoice Number',       # A
+    'Client',               # B - insurance company / policy holder
+    'Invoice Date',         # C
+    'Working Timekeeper',   # D
+    'Matter Name',          # E
+    'Date of Item',         # F
+    'Appeal Expiry',        # G - Finalized Date + 30 days
+    'Item Type',            # H
+    'UNITS',                # I
+    'RATE',                 # J
+    'AMOUNT',               # K
+    'Reduced Amount',       # L
+    'Total Invoice Amount', # M - Grand Total Submitted
+    'Narrative',            # N - description text
+    'Adjustment Reason',    # O - audit category / reason
 ]
 
 # Master Tracker Headers
