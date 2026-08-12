@@ -1,0 +1,26 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "DefaultEndpointsProtocol=https;AccountName=YOUR_STORAGE_ACCOUNT;AccountKey=YOUR_STORAGE_KEY;EndpointSuffix=core.windows.net",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "AZURE_FUNCTIONS_ENVIRONMENT": "Development",
+    "AZURE_TENANT_ID": "YOUR_TENANT_ID",
+    "AZURE_CLIENT_ID": "YOUR_CLIENT_ID",
+    "AZURE_CLIENT_SECRET": "YOUR_CLIENT_SECRET",
+    "USER_EMAIL": "your-email@example.com",
+    "OUTPUT_EMAIL": "output-email@example.com",
+    "MASTER_TRACKER_ONEDRIVE_PATH": "General - Appeals/LSS/OUTPUT/Master Tracker.xlsx"
+  },
+  "Host": {
+    "LocalHttpPort": 7071,
+    "CORS": "*",
+    "CORSCredentials": false
+  },
+  "Logging": {
+    "LogLevel": {
+      "default": "Information",
+      "Host.Results": "Error"
+    }
+  },
+  "functionTimeout": "00:10:00"
+}

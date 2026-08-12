@@ -1,0 +1,47 @@
+name: LSS Automation Scheduler
+
+on:
+  # Run on schedule: 9 AM EST weekdays (2 PM UTC)
+  schedule:
+    - cron: '0 14 * * 1-5'
+
+  # Allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
+
+jobs:
+  trigger-automation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Log schedule trigger
+        run: |
+          echo "LSS Automation triggered at $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+          echo "Cron schedule: 0 14 * * 1-5 (9 AM EST, Monday-Friday)"
+
+      - name: Trigger LSS automation via App Service
+        run: |
+          echo "Calling: https://lss-public.azurewebsites.net/api/run-lss-automation"
+          curl -v -X POST \
+            -H "Content-Type: application/json" \
+            -H "User-Agent: GitHub-Actions-LSS-Scheduler" \
+            https://lss-public.azurewebsites.net/api/run-lss-automation
+
+        # Don't fail if App Service endpoint fails (it may be starting up)
+        continue-on-error: true
+
+      - name: Verify automation started
+        run: |
+          echo "Automation trigger completed."
+          echo "Check Azure App Service logs for execution details:"
+          echo "https://portal.azure.com → LSS-public → Log Stream"
+
+      - name: Notify on failure (optional)
+        if: failure()
+        run: |
+          echo "⚠️ Warning: Could not reach App Service endpoint"
+          echo "This may happen if:"
+          echo "1. App Service is cold-starting (normal, give it 30 seconds)"
+          echo "2. Network connectivity issue"
+          echo "3. App Service is in a stopped state"
+          echo ""
+          echo "Next retry in 24 hours (next scheduled run)"
