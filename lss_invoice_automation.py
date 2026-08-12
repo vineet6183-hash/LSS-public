@@ -15,7 +15,7 @@ import re
 # Import local modules
 from config import *
 from invoice_parser import parse_invoice
-from excel_generator import create_billsync_excel, append_to_master_tracker
+from excel_generator import create_lawsync_excel, append_to_master_tracker
 from graph_client import GraphClient
 
 
@@ -197,10 +197,10 @@ def generate_excel_output(invoice_data_list, errors):
     output_filename = f"LSS_Extracted_{timestamp}.xlsx"
     output_path = os.path.join(OUTPUT_FOLDER, output_filename)
 
-    success = create_billsync_excel(invoice_data_list, output_path, EXCEL_HEADERS)
+    success = create_lawsync_excel(invoice_data_list, output_path, EXCEL_HEADERS)
 
     if success:
-        logger.info(f"BillSync Excel output generated: {output_path}")
+        logger.info(f"LawSync Excel output generated: {output_path}")
         return output_path
     else:
         logger.error("Failed to generate Excel output")

@@ -198,7 +198,7 @@ invoice_parser.py → BaseInvoiceParser.parse(file_path)
 ```
 excel_generator.py → ExcelGenerator.generate(invoice_data)
 │
-├── FORMAT: BillSync (22 columns)
+├── FORMAT: LawSync (22 columns)
 │     Columns:
 │     A  - Invoice Number        M  - Rate Billed
 │     B  - Claim Number          N  - Rate Allowed
@@ -305,7 +305,7 @@ graph_client.py → send_email(to, subject, body, attachments)
   │                               SWYFTT formats)              │
   │                                        │                   │
   │                              [Generate Excel]              │
-  │                              (BillSync 22-column format)   │
+  │                              (LawSync 22-column format)   │
   │                                        │                   │
   │                    ┌───────────────────┤                   │
   │                    │                   │                   │

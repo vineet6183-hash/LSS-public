@@ -27,7 +27,7 @@ OUTPUT_FOLDER = os.path.join(_TEMP, "lss_output")
 # Log File
 LOG_FILE = "lss_automation.log"
 
-# Excel Column Headers (BillSync Format - 15 columns)
+# Excel Column Headers (LawSync Format - 15 columns)
 EXCEL_HEADERS = [
     'Invoice Number',       # A
     'Client',               # B - insurance company / policy holder

@@ -1,6 +1,6 @@
 """
-LSS Invoice → BillSync Streamlit App
-Upload PDF invoices from the LSS Portal and download a BillSync-format Excel file.
+LSS Invoice → LawSync Streamlit App
+Upload PDF invoices from the LSS Portal and download a LawSync-format Excel file.
 """
 
 import io
@@ -11,7 +11,7 @@ import streamlit as st
 import openpyxl
 
 from invoice_parser import parse_invoice
-from excel_generator import create_billsync_excel
+from excel_generator import create_lawsync_excel
 from config import EXCEL_HEADERS
 
 # ── Logging ──────────────────────────────────────────────────────────────────
@@ -42,7 +42,7 @@ def check_password() -> bool:
     if st.session_state.get("authenticated"):
         return True
 
-    st.title("LSS Invoice → BillSync")
+    st.title("LSS Invoice → LawSync")
     st.subheader("Please enter the access password")
 
     with st.form("login_form"):
@@ -74,12 +74,12 @@ def parse_uploaded_pdf(uploaded_file) -> dict | None:
 
 
 def build_excel_bytes(invoice_data_list: list) -> bytes:
-    """Generate BillSync Excel in memory and return raw bytes."""
+    """Generate LawSync Excel in memory and return raw bytes."""
     with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
         tmp_path = tmp.name
 
     try:
-        create_billsync_excel(invoice_data_list, tmp_path, EXCEL_HEADERS)
+        create_lawsync_excel(invoice_data_list, tmp_path, EXCEL_HEADERS)
         with open(tmp_path, "rb") as f:
             return f.read()
     finally:
@@ -113,7 +113,7 @@ def render_summary(invoice_data: dict, filename: str):
 
 def main():
     st.set_page_config(
-        page_title="LSS Invoice → BillSync",
+        page_title="LSS Invoice → LawSync",
         page_icon="📄",
         layout="wide",
     )
@@ -124,17 +124,17 @@ def main():
     # Sidebar – logout
     with st.sidebar:
         st.image("https://img.icons8.com/color/96/invoice.png", width=60)
-        st.title("LSS BillSync Tool")
-        st.markdown("Upload one or more LSS Portal PDF invoices to extract data in BillSync format.")
+        st.title("LSS LawSync Tool")
+        st.markdown("Upload one or more LSS Portal PDF invoices to extract data in LawSync format.")
         st.divider()
         if st.button("🔒 Logout"):
             st.session_state.clear()
             st.rerun()
 
-    st.title("📄 LSS Invoice → BillSync Extractor")
+    st.title("📄 LSS Invoice → LawSync Extractor")
     st.markdown(
         "Upload **PDF invoices** from the LSS Portal. The app will parse each invoice "
-        "and produce a single **BillSync-format Excel** file ready for download."
+        "and produce a single **LawSync-format Excel** file ready for download."
     )
 
     uploaded_files = st.file_uploader(
@@ -178,7 +178,7 @@ def main():
 
     # ── Generate & download Excel ─────────────────────────────────────────────
     st.divider()
-    st.subheader("Download BillSync Excel")
+    st.subheader("Download LawSync Excel")
 
     total_reduced = sum(
         len([i for i in d.get("line_items", []) if i.get("reduced_amount", 0) > 0])
@@ -192,9 +192,9 @@ def main():
     try:
         excel_bytes = build_excel_bytes(success_data)
         st.download_button(
-            label="⬇️ Download BillSync Excel",
+            label="⬇️ Download LawSync Excel",
             data=excel_bytes,
-            file_name="BillSync_Output.xlsx",
+            file_name="LawSync_Output.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             type="primary",
         )

@@ -1,6 +1,6 @@
 """
 Excel Generator Module for LSS Invoice Automation
-Creates Excel files in BillSync format
+Creates Excel files in LawSync format
 """
 
 import openpyxl
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class ExcelGenerator:
-    """Generate Excel output in BillSync format"""
+    """Generate Excel output in LawSync format"""
     
     def __init__(self, output_path, headers):
         self.output_path = output_path
@@ -88,7 +88,7 @@ class ExcelGenerator:
                 tk_initials = item.get("timekeeper_id", "").strip()
                 item_type_display = "Fees" if tk_initials else "Expenses"
 
-                # 15-column BillSync layout
+                # 15-column LawSync layout
                 values = [
                     invoice_number,              # A  Invoice Number
                     client,                      # B  Client (insurance company)
@@ -132,7 +132,7 @@ class ExcelGenerator:
     
     def apply_column_widths(self):
         """Auto-adjust column widths for readability"""
-        # Column widths for 15-column BillSync layout
+        # Column widths for 15-column LawSync layout
         column_widths = {
             'A': 15,  # Invoice Number
             'B': 30,  # Client
@@ -168,9 +168,9 @@ class ExcelGenerator:
             return False
 
 
-def create_billsync_excel(invoice_data_list, output_path, headers):
+def create_lawsync_excel(invoice_data_list, output_path, headers):
     """
-    Main function to create BillSync format Excel file
+    Main function to create LawSync format Excel file
     
     Args:
         invoice_data_list: List of parsed invoice data dictionaries

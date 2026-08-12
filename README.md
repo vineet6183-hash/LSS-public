@@ -1,6 +1,6 @@
 # LSS Invoice Automation
 
-Automates the extraction of reduced line items from PDF invoice attachments received via email from `@dxc-ins.com`. The script filters emails, parses PDFs in multiple formats, and generates Excel output in BillSync format.
+Automates the extraction of reduced line items from PDF invoice attachments received via email from `@dxc-ins.com`. The script filters emails, parses PDFs in multiple formats, and generates Excel output in LawSync format.
 
 ## Features
 
@@ -14,7 +14,7 @@ Automates the extraction of reduced line items from PDF invoice attachments rece
   - Invoice header information (Invoice Number, Claim Number, Company, etc.)
   - Line item details (Timekeeper, Date, Item Type, Description, Rate, Units, Amount, etc.)
   - Timekeeper ID to Name mapping
-- ✅ **Excel Output**: Generates formatted Excel files in BillSync style
+- ✅ **Excel Output**: Generates formatted Excel files in LawSync style
 - ✅ **File Management**: Automatically moves processed PDFs to archive folder
 - ✅ **Comprehensive Logging**: Detailed logs for debugging and audit trail
 
@@ -229,5 +229,5 @@ For issues or questions:
 - **v1.0** (2026-01-06): Initial release
   - Email filtering from @dxc-ins.com
   - Multi-format PDF parsing (GAIC, NARS, PMA, Progressive, SWYFTT)
-  - Excel output in BillSync format
+  - Excel output in LawSync format
   - Automated file management
