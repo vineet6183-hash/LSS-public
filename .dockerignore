@@ -1,0 +1,17 @@
+.git
+.gitignore
+.github
+__pycache__
+*.pyc
+*.pyo
+*.log
+.env
+.env.*
+.streamlit/secrets.toml
+*.xlsx
+*.pdf
+lss_incoming/
+lss_processed/
+lss_output/
+README.md
+LSS_ORCHESTRATION.md
