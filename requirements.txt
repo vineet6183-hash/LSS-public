@@ -3,7 +3,3 @@ requests
 pdfplumber
 beautifulsoup4
 openpyxl
-flask
-gunicorn
-azure-identity
-azure-storage-blob
